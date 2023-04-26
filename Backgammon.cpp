@@ -114,7 +114,7 @@ Tablero inicializarTablero(){
     string *colores = new string[24];
     colores[0] = "X";
     colores[5] = "O";
-    colores[7] = "O";
+    colores[9] = "O";
     colores[11] = "X";
     colores[12] = "O";
     colores[14] = "X";
@@ -159,11 +159,10 @@ void imprimirTablero(Tablero tablero)
         cout << i + 1 << " | ";
 
         int c = tablero.getCasilla(i).getCant();
-        string color = tablero.getCasilla(i).getColor();
 
         for (int j = 0; j < c; j++)
         {
-            cout << color;
+            cout << tablero.getCasilla(i).getColor();
         }
 
         for (int q = 0; q < 5-c; q++)
