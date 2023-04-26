@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include <ctime>
+#include <math.h>
 
 using namespace std;
 
@@ -60,16 +61,17 @@ string Casilla::getColor()
 class Tablero
 {
     private:
-        int n_comidas;
-        int b_comidas;
-        int n_fuera;
-        int b_fuera;
+        int o_comidas;
+        int x_comidas;
+        int o_fuera;
+        int x_fuera;
         Casilla casillas[24];
 
     public:
         Tablero(Casilla[]);
         Casilla getCasilla(int);
-        int get_n_comidas();
+        int get_x_comidas();
+        int get_o_comidas();
 };
 
 Casilla Tablero::getCasilla(int i)
@@ -77,17 +79,22 @@ Casilla Tablero::getCasilla(int i)
     return this->casillas[i];
 }
 
-int Tablero::get_n_comidas()
+int Tablero::get_x_comidas()
 {
-    return this->n_comidas;
+    return this->x_comidas;
+}
+
+int Tablero::get_o_comidas()
+{
+    return this->o_comidas;
 }
 
 Tablero::Tablero(Casilla _casillas[])
 {
-    this->n_comidas = 0;
-    this->b_comidas = 0;
-    this->n_fuera = 0;
-    this->b_fuera = 0;
+    this->x_comidas = 0;
+    this->o_comidas = 0;
+    this->x_fuera = 0;
+    this->o_fuera = 0;
 
     for (int i = 0; i < 24; i++)
     {
@@ -133,7 +140,6 @@ Tablero inicializarTablero(){
             colores[i] = "vacio";
         }
 
-        
         if (i % 6 == 0)
         {
             cuadrante++;
@@ -172,6 +178,10 @@ void imprimirTablero(Tablero tablero)
 
         cout << endl;
     }
+
+    cout <<"\nPiezas comidas:\n";
+    cout <<"blancas (X) > "<< tablero.get_x_comidas()<<endl;
+    cout <<"negras  (O) > "<< tablero.get_o_comidas()<<endl;
 }
 
 void bienvenida()
@@ -185,45 +195,165 @@ void bienvenida()
 
 }
 
-
-// bool validarMovimiento(Tablero tablero, int movs, int origen, string turno)
-// {
-//     // Casilla destino = tablero.getCasilla(origen);
-
-//     // return true;
-//     return 1;
-
-// }
-
-void pedirMovimiento(string turno, Tablero tablero)
+int getFichasPorCuadrante(Tablero tablero, string turno, int cuadrante)
 {
-    system("pause");
-    system("cls");
+    int fichas = 0;
 
-    imprimirTablero(tablero);
+    if (turno == "X")
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            fichas += tablero.getCasilla(i).getCant();
+        }
+    }
+    else
+    {
+        for (int i = 23; i >= 18; i++)
+        {
+            fichas += tablero.getCasilla(i).getCant();
+        }
+    }
 
-    int origen = 0, cant = 0;
+    return fichas;
+}
+
+
+bool validarMovimiento(Tablero tablero, int movs, int origen, string turno)
+{
+    int avanzar = 0;
+
+    if (turno == "X")
+    {
+        avanzar = movs;
+        
+        if(origen + avanzar == 24)
+        {
+            if (getFichasPorCuadrante(tablero, turno, 4) == 15)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    } 
+    else 
+    {
+        avanzar = movs * -1;
+
+        if(origen + avanzar == -1)
+        {
+            if (getFichasPorCuadrante(tablero, turno, 1) == 15)
+            {
+                return true;
+            }
+            
+            return false;
+        }
+    }
+
+    
+
+
+
+    Casilla destino = tablero.getCasilla(origen + avanzar);
+    Casilla origen = tablero.getCasilla(origen);
+
+    int cant = destino.getCant();
+
+    if (cant < 1 || cant == 5)
+    {
+        return false;
+    }
+    
+
+
+    return true;
+
+}
+
+bool pedirMovimiento(string turno, Tablero tablero)
+{
     Dado dado = Dado();
-
+    int origen = 0, opc_cant = 0, movidas = 0;
     int d1 = dado.tirar();
     int d2 = dado.tirar();
-    
-    int movs[] = {d1,d2,d1+d2};
 
-    do
-    {
+    bool band = true;
+    bool mov = false;
+    
+    int *movs = new int[3];
+    movs[0] = d1;
+    movs[1] = d2;
+    movs[2] = d1+d2;
+    
+    do{
+
+        system("pause");
+        system("cls");
+
+        imprimirTablero(tablero);
+
+        cout << "\nSeleccione la casilla de la ficha que desea mover\n> ";
+        cin >> origen;
+
+        origen -= 1;
+
+        if (tablero.getCasilla(origen).getColor() != turno)
+        {
+            cout << "Esas fichas no te pertenecen";
+            continue;
+        }
+
         cout << "\nSeleccionar la cantidad de casillas a mover\n";
         cout << "1. Dado 1 : " << d1<<endl;
         cout << "2. Dado 2 : " << d2<<endl;
         cout << "3. Ambos  : " << d1 + d2<<endl;
-        cout << "opc > "; cin >> cant; cout << endl;
-    }while(cant > 3 || cant < 1);
+        do
+        {
+            cout << "opc > "; cin >> opc_cant; cout << endl;
+        }while(opc_cant > 3 || opc_cant < 1);
+
+        opc_cant -= 1;
+
+        movidas = 0;
+
+        while(true)
+        {
+            mov = validarMovimiento(tablero, movs[opc_cant], origen, turno);
+
+            if (mov)
+            {
+                // Hacer Movimiento
+
+                movidas += movs[opc_cant];
+
+                if (movidas == d1 + d2)
+                {
+                    band = true;
+                    break;
+                }
+                else 
+                {
+                    opc_cant = opc_cant + (pow(-1,opc_cant+1));
+                }
+            }
+            else
+            {
+                cout << "-----------------------\n";
+                cout << " Movimiento erroneo...\n";
+                cout << "-----------------------\n";
+                break;
+            }
+        }    
 
 
-    cout << "Seleccione la casilla de la ficha que desea mover\n> ";
-    cin >> origen;
+        
+    }while(!band);
+    
 
-    // validarMovimiento(tablero, movs[cant-1], origen, turno);
+
+    delete[] movs;
+    return true;
 
 }
 
@@ -237,47 +367,48 @@ int main()
 
     // bienvenida();
 
-    imprimirTablero(tablero);
+    // imprimirTablero(tablero);
 
-    cout << tablero.getCasilla(9).getColor();
+    do
+    {
+        imprimirTablero(tablero);
 
-    // do
-    // {
-    //     imprimirTablero(tablero);
+        cout << "\nTurno : " << turno <<"\n\n";
 
-    //     cout << "\nTurno : " << turno <<"\n\n";
+        cout << "Desea tirar los dados?\n1. Tirar\n2. Abandonar\n> ";
+        int opc;
+        cin >> opc;
 
-    //     cout << "Desea tirar los dados?\n1. Tirar\n2. Abandonar\n> ";
-    //     int opc;
-    //     cin >> opc;
-
-    //     switch (opc)
-    //     {
-    //         case 1:
+        switch (opc)
+        {
+            case 1:
                 
-    //             pedirMovimiento(turno, tablero);
+
+
+                // pedir, validar y hacer movimiento
+
+
+                if (turno == "X")
+                {
+                    turno = "O";
+                } else {
+                    turno = "X";
+                }
 
 
 
-
-
-    //         case 2:
-    //             exit(0);
-    //     }
+            case 2:
+                salir = true;
+        }
 
 
 
-    //     if (turno == "X")
-    //     {
-    //         turno = "O";
-    //     } else {
-    //         turno = "X";
-    //     }
+        
 
-    //     system ("pause");
-    //     system ("cls");
+        system ("pause");
+        system ("cls");
 
-    // } while (!salir);
+    } while (!salir);
     
 
     
