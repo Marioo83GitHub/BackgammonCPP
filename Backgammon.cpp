@@ -1,4 +1,6 @@
 // Arroz con pollo
+// Oscar y Eduardo Best friend forever
+
 
 #include <iostream>
 #include <stdlib.h>
