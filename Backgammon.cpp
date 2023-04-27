@@ -8,8 +8,8 @@ using namespace std;
 
 class Dado
 {
-    public:
-        int tirar();
+public:
+    int tirar();
 };
 
 int Dado::tirar()
@@ -23,17 +23,17 @@ int Dado::tirar()
 
 class Casilla
 {
-    private:
-        int cant_piezas;
-        int cuadrante;
-        string color_pieza;
+private:
+    int cant_piezas;
+    int cuadrante;
+    string color_pieza;
 
-    public:
-        Casilla() = default;
-        Casilla(int, int, string);
-        int getCant();
-        int getCuadrante();
-        string getColor();
+public:
+    Casilla() = default;
+    Casilla(int, int, string);
+    int getCant();
+    int getCuadrante();
+    string getColor();
 };
 
 Casilla::Casilla(int _cant, int _cuadrante, string _color)
@@ -60,18 +60,18 @@ string Casilla::getColor()
 
 class Tablero
 {
-    private:
-        int o_comidas;
-        int x_comidas;
-        int o_fuera;
-        int x_fuera;
-        Casilla casillas[24];
+private:
+    int o_comidas;
+    int x_comidas;
+    int o_fuera;
+    int x_fuera;
+    Casilla casillas[24];
 
-    public:
-        Tablero(Casilla[]);
-        Casilla getCasilla(int);
-        int get_x_comidas();
-        int get_o_comidas();
+public:
+    Tablero(Casilla[]);
+    Casilla getCasilla(int);
+    int get_x_comidas();
+    int get_o_comidas();
 };
 
 Casilla Tablero::getCasilla(int i)
@@ -103,10 +103,10 @@ Tablero::Tablero(Casilla _casillas[])
     }
 }
 
-
 // Funciones
 
-Tablero inicializarTablero(){
+Tablero inicializarTablero()
+{
 
     int *cants = new int[24];
     cants[0] = 2;
@@ -152,15 +152,15 @@ Tablero inicializarTablero(){
     delete[] cants;
 
     return Tablero(casillas);
-
 }
 
 void imprimirTablero(Tablero tablero)
 {
     for (int i = 0; i < 24; i++)
     {
-        if (i < 9) { 
-            cout <<" "; 
+        if (i < 9)
+        {
+            cout << " ";
         }
         cout << i + 1 << " | ";
 
@@ -171,28 +171,27 @@ void imprimirTablero(Tablero tablero)
             cout << tablero.getCasilla(i).getColor();
         }
 
-        for (int q = 0; q < 5-c; q++)
+        for (int q = 0; q < 5 - c; q++)
         {
-            cout <<"-";
+            cout << "-";
         }
 
         cout << endl;
     }
 
-    cout <<"\nPiezas comidas:\n";
-    cout <<"blancas (X) > "<< tablero.get_x_comidas()<<endl;
-    cout <<"negras  (O) > "<< tablero.get_o_comidas()<<endl;
+    cout << "\nPiezas comidas:\n";
+    cout << "25 | blancas (X) > " << tablero.get_x_comidas() << endl;
+    cout << "26 | negras  (O) > " << tablero.get_o_comidas() << endl;
 }
 
 void bienvenida()
 {
-    cout <<"--------------------------------\n";
-    cout <<"  Bienvenido a Backgammon!\n";
-    cout <<"--------------------------------\n\n";
+    cout << "--------------------------------\n";
+    cout << "  Bienvenido a Backgammon!\n";
+    cout << "--------------------------------\n\n";
 
     system("pause");
     system("cls");
-
 }
 
 int getFichasPorCuadrante(Tablero tablero, string turno, int cuadrante)
@@ -217,163 +216,63 @@ int getFichasPorCuadrante(Tablero tablero, string turno, int cuadrante)
     return fichas;
 }
 
-
-bool validarMovimiento(Tablero tablero, int movs, int origen, string turno)
+bool validarMovimiento(Tablero tablero, int origen, int mover, string turno)
 {
-    int avanzar = 0;
-
-    if (turno == "X")
-    {
-        avanzar = movs;
-        
-        if(origen + avanzar == 24)
-        {
-            if (getFichasPorCuadrante(tablero, turno, 4) == 15)
-            {
-                return true;
-            }
-
-            return false;
-        }
-    } 
-    else 
-    {
-        avanzar = movs * -1;
-
-        if(origen + avanzar == -1)
-        {
-            if (getFichasPorCuadrante(tablero, turno, 1) == 15)
-            {
-                return true;
-            }
-            
-            return false;
-        }
-    }
-
-    
-
-
-
-    Casilla destino = tablero.getCasilla(origen + avanzar);
-    Casilla origen = tablero.getCasilla(origen);
-
-    int cant = destino.getCant();
-
-    if (cant < 1 || cant == 5)
-    {
-        return false;
-    }
-    
-
-
-    return true;
-
+    // Validaciones
 }
 
-bool pedirMovimiento(string turno, Tablero tablero)
+bool pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
 {
-    Dado dado = Dado();
-    int origen = 0, opc_cant = 0, movidas = 0;
-    int d1 = dado.tirar();
-    int d2 = dado.tirar();
+    int origen = 0, origen2 = 0;
+    bool val = false;
 
-    bool band = true;
-    bool mov = false;
-    
-    int *movs = new int[3];
-    movs[0] = d1;
-    movs[1] = d2;
-    movs[2] = d1+d2;
-    
-    do{
-
-        system("pause");
+    do
+    {
         system("cls");
 
         imprimirTablero(tablero);
 
-        cout << "\nSeleccione la casilla de la ficha que desea mover\n> ";
-        cin >> origen;
-
         origen -= 1;
 
-        if (tablero.getCasilla(origen).getColor() != turno)
+        // Mover una sola ficha
+        if (d2 == 0)
         {
-            cout << "Esas fichas no te pertenecen";
-            continue;
+            cout << "Ingrese el origen: ";
+            cin >> origen;
+
+            val = validarMovimiento(tablero, origen, d1, turno);
+        }
+        // Mover dos fichas
+        else
+        {
+            cout << "Ingrese el origen de la primera ficha\n> ";
+            cin >> origen;
+
+            if (validarMovimiento(tablero, origen, d1, turno))
+            {
+                cout << "Ingrese el origen de la segunda ficha\n> ";
+                cin >> origen2;
+
+                val = validarMovimiento(tablero, origen2, d2, turno);
+            }
         }
 
-        cout << "\nSeleccionar la cantidad de casillas a mover\n";
-        cout << "1. Dado 1 : " << d1<<endl;
-        cout << "2. Dado 2 : " << d2<<endl;
-        cout << "3. Ambos  : " << d1 + d2<<endl;
-        do
-        {
-            cout << "opc > "; cin >> opc_cant; cout << endl;
-        }while(opc_cant > 3 || opc_cant < 1);
-
-        opc_cant -= 1;
-
-        movidas = 0;
-
-        while(true)
-        {
-            mov = validarMovimiento(tablero, movs[opc_cant], origen, turno);
-
-            if (mov)
-            {
-                // Hacer Movimiento
-
-                movidas += movs[opc_cant];
-
-                if (movidas == d1 + d2)
-                {
-                    band = true;
-                    break;
-                }
-                else 
-                {
-                    opc_cant = opc_cant + (pow(-1,opc_cant+1));
-                }
-            }
-            else
-            {
-                cout << "-----------------------\n";
-                cout << " Movimiento erroneo...\n";
-                cout << "-----------------------\n";
-                break;
-            }
-        }    
-
-
-        
-    }while(!band);
-    
-
-
-    delete[] movs;
-    return true;
-
+    } while (!val);
 }
 
 int main()
 {
     bool salir = false;
+    int moves = 0;
     string turno = "X";
 
-    
     Tablero tablero = inicializarTablero();
-
-    // bienvenida();
-
-    // imprimirTablero(tablero);
 
     do
     {
         imprimirTablero(tablero);
 
-        cout << "\nTurno : " << turno <<"\n\n";
+        cout << "\nTurno : " << turno << "\n\n";
 
         cout << "Desea tirar los dados?\n1. Tirar\n2. Abandonar\n> ";
         int opc;
@@ -381,39 +280,43 @@ int main()
 
         switch (opc)
         {
-            case 1:
-                
+        case 1:
 
+            Dado dado = Dado();
+            int d1 = dado.tirar();
+            int d2 = dado.tirar();
 
-                // pedir, validar y hacer movimiento
+            cout << "Dado 1: " << d1 << endl;
+            cout << "Dado 2: " << d2 << endl;
 
+            cout << "\nDesea mover una o dos fichas?";
+            cin >> moves;
 
-                if (turno == "X")
-                {
-                    turno = "O";
-                } else {
-                    turno = "X";
-                }
+            if (moves == 1)
+            {
+                d1 = d1 + d2;
+                d2 = 0;
+            }
 
+            pedirMovimiento(tablero, turno, d1, d2);
 
+            if (turno == "X")
+            {
+                turno = "O";
+            }
+            else
+            {
+                turno = "X";
+            }
 
-            case 2:
-                salir = true;
+        case 2:
+            salir = true;
         }
 
-
-
-        
-
-        system ("pause");
-        system ("cls");
+        system("pause");
+        system("cls");
 
     } while (!salir);
-    
-
-    
-
-    
 
     system("pause");
     return 0;

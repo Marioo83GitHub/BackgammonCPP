@@ -1,0 +1,9 @@
+1 - Que la casilla de destino este adelante de la casilla de origen segun el turno
+2 - Que la casilla de origen es la misma que el turno
+3 - Que no hayan dos o mas fichas enemigas en la casilla de origen
+4 - Si solo hay una ficha enemiga en la casilla de origen, Funcion Comer.
+5 - Si la ficha sale del tablero, que no sobrepase la ultima casilla + 1,
+    aparte de que todas las fichas deben estar en el ultimo cuadrante, dependiendo del turno.
+6 - Si se desea sacar una casilla en penitencia, debe tener un 1 en un dado.
+
+
