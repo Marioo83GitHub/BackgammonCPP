@@ -462,7 +462,8 @@ int main()
         {
         case 1:
 
-            Dado dado = Dado();
+           {
+           	 Dado dado = Dado();
             int d1 = dado.tirar();
             int d2 = dado.tirar();
 
@@ -488,9 +489,14 @@ int main()
             {
                 turno = "X";
             }
-
+            break;
+		   }
+				
         case 2:
-            salir = true;
+            {
+            	salir = true;
+            break;
+			}
         }
 
         system("pause");
