@@ -32,8 +32,10 @@ public:
     Casilla() = default;
     Casilla(int, int, string);
     int getCant();
+    void setCant(int);
     int getCuadrante();
     string getColor();
+    void setColor(string);
 };
 
 Casilla::Casilla(int _cant, int _cuadrante, string _color)
@@ -46,6 +48,16 @@ Casilla::Casilla(int _cant, int _cuadrante, string _color)
 int Casilla::getCant()
 {
     return this->cant_piezas;
+}
+
+void Casilla::setCant(int _cant)
+{
+    this->cant_piezas = _cant;
+}
+
+void Casilla::setColor(string _color)
+{
+    this->color_pieza = _color;
 }
 
 int Casilla::getCuadrante()
@@ -61,10 +73,10 @@ string Casilla::getColor()
 class Tablero
 {
 private:
-    int o_comidas;
     int x_comidas;
-    int o_fuera;
+    int o_comidas;
     int x_fuera;
+    int o_fuera;
     Casilla casillas[24];
 
 public:
@@ -72,6 +84,12 @@ public:
     Casilla getCasilla(int);
     int get_x_comidas();
     int get_o_comidas();
+    int get_x_fuera();
+    int get_o_fuera();
+    void set_x_comidas(int);
+    void set_o_comidas(int);
+    void set_x_fuera(int);
+    void set_o_fuera(int);
 };
 
 Casilla Tablero::getCasilla(int i)
@@ -87,6 +105,36 @@ int Tablero::get_x_comidas()
 int Tablero::get_o_comidas()
 {
     return this->o_comidas;
+}
+
+int Tablero::get_x_fuera()
+{
+    return this->x_fuera;
+}
+
+int Tablero::get_o_fuera()
+{
+    return this->o_fuera;
+}
+
+void Tablero::set_x_comidas(int _x)
+{
+    this->x_comidas = _x;
+}
+
+void Tablero::set_o_comidas(int _o)
+{
+    this->o_comidas = _o;
+}
+
+void Tablero::set_x_fuera(int _x)
+{
+    this->x_fuera = _x;
+}
+
+void Tablero::set_o_fuera(int _o)
+{
+    this->o_fuera = _o;
 }
 
 Tablero::Tablero(Casilla _casillas[])
@@ -137,7 +185,7 @@ Tablero inicializarTablero()
         if (cants[i] < 1)
         {
             cants[i] = 0;
-            colores[i] = "vacio";
+            colores[i] = "None";
         }
 
         if (i % 6 == 0)
@@ -179,9 +227,9 @@ void imprimirTablero(Tablero tablero)
         cout << endl;
     }
 
-    cout << "\nPiezas comidas:\n";
-    cout << "25 | blancas (X) > " << tablero.get_x_comidas() << endl;
-    cout << "26 | negras  (O) > " << tablero.get_o_comidas() << endl;
+    cout << "\nPiezas en penitencia:\n";
+    cout << "26 | blancas (X) > " << tablero.get_x_comidas() << endl;
+    cout << "27 | negras  (O) > " << tablero.get_o_comidas() << endl;
 }
 
 void bienvenida()
@@ -196,32 +244,157 @@ void bienvenida()
 
 int getFichasPorCuadrante(Tablero tablero, string turno, int cuadrante)
 {
-    int fichas = 0;
+    int fichas_cuadrante = 0;
 
-    if (turno == "X")
+    for (int i = 0; i < 24; i++)
     {
-        for (int i = 0; i < 6; i++)
+        if (tablero.getCasilla(i).getColor() == turno && tablero.getCasilla(i).getCuadrante() == cuadrante)
         {
-            fichas += tablero.getCasilla(i).getCant();
-        }
-    }
-    else
-    {
-        for (int i = 23; i >= 18; i++)
-        {
-            fichas += tablero.getCasilla(i).getCant();
+            fichas_cuadrante += tablero.getCasilla(i).getCant();
         }
     }
 
-    return fichas;
+    return fichas_cuadrante;
 }
 
 bool validarMovimiento(Tablero tablero, int origen, int mover, string turno)
 {
-    // Validaciones
+    int destino = 0, t = 1, limite = 24, cuadrante_final = 0;
+
+    // Verificar si la casilla de origen es la misma que la del turno
+    if (turno != tablero.getCasilla(origen).getColor())
+    {
+        cout << "No puedes mover una ficha que no es tuya\n";
+        system("pause");
+        return false;
+    }
+
+    if (turno == "O")
+    {
+        // Validaciones para las negras
+
+        // Verificar que el origen no sea la penitencia de las negras
+        if (origen == 26)
+        {
+            cout << "No puedes sacar las fichas en penitencia de tu rival\n";
+            system("pause");
+            return false;
+        }
+
+        if (origen == 27)
+        {
+            origen = 23;
+        }
+
+        limite = -1;
+        t = -1;
+        cuadrante_final = 4;
+    }
+    else
+    {
+        // Validaciones para las blancas
+
+        // Verificar que el origen no sea la penitencia de las blancas
+        if (origen == 27)
+        {
+            cout << "No puedes sacar las fichas en penitencia de tu rival\n";
+            system("pause");
+            return false;
+        }
+
+        if (origen == 26)
+        {
+            origen = 0;
+        }
+
+        cuadrante_final = 1;
+    }
+
+    destino = origen + (mover * t);
+
+    // Verificar que el destino no sea mayor a 24 o menor a 1
+    if (destino > 24 || destino < 1)
+    {
+        cout << "No puedes mover una ficha fuera del tablero\n";
+        system("pause");
+        return false;
+    }
+
+    if (destino == 24 || destino == 0)
+    {
+        // Verificar que no hayan fichas en ningun otro cuadrante
+        for (int i = 1; i < 5; i++)
+        {
+            if (getFichasPorCuadrante(tablero, turno, i) > 0 && i != cuadrante_final)
+            {
+                cout << "No puedes mover una ficha a la salida si tienes fichas en otros cuadrantes\n";
+                system("pause");
+                return false;
+            }
+        }
+    }
+
+    // Verificar que no hayan dos o mas fichas del turno contrario en la casilla de destino
+    if (tablero.getCasilla(destino).getColor() != turno && tablero.getCasilla(destino).getCant() > 1)
+    {
+        cout << "No puedes mover a una casilla con dos o mas fichas del contrario\n";
+        system("pause");
+        return false;
+    }
+
+    // Verificar que no hayan mas de 5 fichas aliadas en la casilla de destino
+    if (tablero.getCasilla(destino).getColor() == turno && tablero.getCasilla(destino).getCant() > 5)
+    {
+        cout << "No puedes mover a una casilla con mas de 5 fichas aliadas\n";
+        system("pause");
+        return false;
+    }
+
+    // Se han aprobado todas las validaciones
+    return true;
 }
 
-bool pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
+void moverFicha(Tablero tablero, int origen, int moves, string turno)
+{
+    if (turno == "O")
+    {
+        moves *= -1;
+    }
+
+    int destino = origen + moves;
+
+
+    // Mover la ficha
+    tablero.getCasilla(origen).setCant(tablero.getCasilla(origen).getCant() - 1);
+    tablero.getCasilla(destino).setCant(tablero.getCasilla(destino).getCant() + 1);
+
+    // Validar que la casilla destino este vacia
+    if (tablero.getCasilla(destino).getCant() == 0)
+    {
+        tablero.getCasilla(destino).setColor(turno);
+    }
+
+    // Validar que haya una ficha enemiga en la casilla destino
+    if (tablero.getCasilla(destino).getColor() != turno && tablero.getCasilla(destino).getCant() == 1)
+    {
+        if (turno == "O")
+        {
+            // Comer ficha blanca
+            tablero.set_x_comidas(tablero.get_x_comidas() + 1);
+        }
+        else
+        {
+            // Comer ficha negra
+            tablero.set_o_comidas(tablero.get_o_comidas() + 1);
+        }
+        
+        // Cambiar el color de la casilla destino
+        tablero.getCasilla(destino).setColor(turno);
+        tablero.getCasilla(destino).setCant(0);
+    }
+}
+
+void pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
 {
     int origen = 0, origen2 = 0;
     bool val = false;
@@ -258,6 +431,13 @@ bool pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
         }
 
     } while (!val);
+
+    moverFicha(tablero, origen, d1, turno);
+
+    if (d2 != 0)
+    {
+        moverFicha(tablero, origen2, d2, turno);
+    }
 }
 
 int main()
