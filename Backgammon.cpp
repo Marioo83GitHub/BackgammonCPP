@@ -1,7 +1,3 @@
-// Arroz con pollo
-// Oscar y Eduardo Best friend forever
-
-
 #include <iostream>
 #include <stdlib.h>
 #include <cstdlib>
@@ -358,7 +354,7 @@ bool validarMovimiento(Tablero tablero, int origen, int mover, string turno)
     return true;
 }
 
-void moverFicha(Tablero tablero, int origen, int moves, string turno)
+bool moverFicha(Tablero tablero, int origen, int moves, string turno)
 {
     if (turno == "O")
     {
@@ -367,35 +363,54 @@ void moverFicha(Tablero tablero, int origen, int moves, string turno)
 
     int destino = origen + moves;
 
+    // Validar que la casilla destino sea 24 o -1
+    if (destino == 24 || destino == -1)
+    {
+        // Sacar ficha del origen
+        tablero.getCasilla(origen).setCant(tablero.getCasilla(origen).getCant() - 1);
+
+        // Mover fichas fuera del tablero
+        if (turno == "O")
+        {
+            tablero.set_o_fuera(tablero.get_o_fuera() + 1);
+        }
+        else
+        {
+            tablero.set_x_fuera(tablero.get_x_fuera() + 1);
+        }
+
+        return true;
+    }
+
+    // Validar que la casilla destino sea de distinto color que la casilla origen, o que este vacia
+    if (tablero.getCasilla(destino).getColor() != turno)
+    {
+        // Validar que haya una ficha enemiga en la casilla destino
+        if (tablero.getCasilla(destino).getColor() != turno && tablero.getCasilla(destino).getCant() == 1)
+        {
+            if (turno == "X")
+            {
+                // Comer ficha negra
+                tablero.set_o_comidas(tablero.get_o_comidas() + 1);
+            }
+            else
+            {
+                // Comer ficha blanca
+                tablero.set_x_comidas(tablero.get_x_comidas() + 1);
+            }
+        }
+
+        // Cambiar el color de la casilla destino
+        tablero.getCasilla(destino).setColor(turno);
+    }
+    else
+    {
+    }
 
     // Mover la ficha
     tablero.getCasilla(origen).setCant(tablero.getCasilla(origen).getCant() - 1);
     tablero.getCasilla(destino).setCant(tablero.getCasilla(destino).getCant() + 1);
-
-    // Validar que la casilla destino este vacia
-    if (tablero.getCasilla(destino).getCant() == 0)
-    {
-        tablero.getCasilla(destino).setColor(turno);
-    }
-
-    // Validar que haya una ficha enemiga en la casilla destino
-    if (tablero.getCasilla(destino).getColor() != turno && tablero.getCasilla(destino).getCant() == 1)
-    {
-        if (turno == "O")
-        {
-            // Comer ficha blanca
-            tablero.set_x_comidas(tablero.get_x_comidas() + 1);
-        }
-        else
-        {
-            // Comer ficha negra
-            tablero.set_o_comidas(tablero.get_o_comidas() + 1);
-        }
-        
-        // Cambiar el color de la casilla destino
-        tablero.getCasilla(destino).setColor(turno);
-        tablero.getCasilla(destino).setCant(0);
-    }
+    return true;
 }
 
 void pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
@@ -444,6 +459,24 @@ void pedirMovimiento(Tablero tablero, string turno, int d1, int d2)
     }
 }
 
+bool centinelaGanador(Tablero tablero)
+{
+    if (tablero.get_o_fuera() == 15)
+    {
+        cout << "Ganador: O\n";
+        return true;
+    }
+    else if (tablero.get_x_fuera() == 15)
+    {
+        cout << "Ganador: X\n";
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 int main()
 {
     bool salir = false;
@@ -465,9 +498,9 @@ int main()
         switch (opc)
         {
         case 1:
+        {
 
-           {
-           	 Dado dado = Dado();
+            Dado dado = Dado();
             int d1 = dado.tirar();
             int d2 = dado.tirar();
 
@@ -493,14 +526,19 @@ int main()
             {
                 turno = "X";
             }
-            break;
-		   }
-				
-        case 2:
+
+            if (centinelaGanador(tablero))
             {
-            	salir = true;
+                salir = true;
+            }
+
             break;
-			}
+        }
+        case 2:
+        {
+            salir = true;
+            break;
+        }
         }
 
         system("pause");
